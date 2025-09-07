@@ -1,29 +1,36 @@
+#include "enemy.h"
 #include "entity.h"
+#include "entitymanager.h"
 #include "raylib.h"
-#include "projectile.h"
 #include "player.h"
+#include "collision.h"
 #include <cmath>
 #include <vector>
 
 #define SPAWN_INTERVAL 0.1f
 
-std::vector<Entity*> entitylist;
-
-void UpdateEntities(float deltaTime);
-void DrawEntities();
-void EmptyList();
-
-void CleanEntityList(Player *player);
+void EmptyList(std::vector<Entity*>& entitylist);
+void CleanEntityList(Player *player, std::vector<Entity*>& entitylist);
 
 int main(void) {
     InitWindow(800, 800, "Bullet Hell");
-    SetTargetFPS(60);
+    SetTargetFPS(999);
 
-    Projectile *proj = new Projectile(&entitylist);
-    Player *player = new Player(&entitylist);
+    EntityManager *entityManager = new EntityManager();
+    Collision *collision = new Collision();
 
-    proj->SetPosition(400, 90);
-    proj->SetSize(40);
+    Enemy *enemy = new Enemy(entityManager);
+    enemy->SetBulletNumber(10);
+    enemy->SetPosition(400, 60);
+    enemy->SetSize(40);
+
+    Player *player = new Player();
+    player->SetPosition(400, 600);
+
+    entityManager->Add(player);
+    entityManager->Add(enemy);
+
+    std::vector<Entity*>& entitylist = entityManager->entitylist;
 
     double nextSpawnTime = 0;
 
@@ -31,51 +38,30 @@ int main(void) {
         float deltaTime = GetFrameTime();
         double time = GetTime();
 
-        CleanEntityList(player);
-        UpdateEntities(deltaTime);
-
-        if (time >= nextSpawnTime) {
-            nextSpawnTime = time + SPAWN_INTERVAL;
-
-            int numBullets = GetRandomValue(3, 8); 
-
-            float rotationSpeed = 1.5f; // radians/sec
-            float baseAngle = rotationSpeed * time;
-
-            for (int i = 0; i < numBullets; i++) {
-                float randomOffset = GetRandomValue(0, 314) / 100.0f; // 0 to ~3.14 radians
-                float angle = baseAngle + i * 2 * PI / numBullets + randomOffset;
-
-                Projectile *bullet = new Projectile(&entitylist);
-                Vector2 pos = proj->GetPosition();
-                bullet->SetPosition(pos.x, pos.y);
-                bullet->SetColor(RED);
-                bullet->SetSize(GetRandomValue(4, 15));
-                bullet->SetColor(ColorFromHSV(GetRandomValue(0, 360), 0.5f, 1.f));
-
-                float speedMagnitude = GetRandomValue(80, 120);
-                bullet->speed = { cos(angle) * speedMagnitude, sin(angle) * speedMagnitude };
-            }
-        }
+        CleanEntityList(player, entitylist);
+        entityManager->UpdateAll(deltaTime);
 
         BeginDrawing();
         ClearBackground(BLACK);
         
-        DrawEntities();
+        entityManager->DrawAll();
 
-        DrawText(TextFormat("Colliding: %b", player->IsColliding(&entitylist)), 10, 10, 16, WHITE);
+        DrawText(TextFormat("Colliding: %b", collision->IsCollidingWithAny(player, entitylist)), 10, 10, 16, WHITE);
         DrawText(TextFormat("Entities: %i", entitylist.size()), 10, 50, 16, WHITE);
         DrawFPS(10, 70);
 
         EndDrawing();
     }
 
-    EmptyList();
+    delete collision;
+    delete entityManager;
+
+    EmptyList(entitylist);
     CloseWindow();
     return 0;
 }
 
-void CleanEntityList(Player *player) {
+void CleanEntityList(Player *player, std::vector<Entity*>& entitylist) {
     for (int i = entitylist.size() - 1; i >= 0; i--) {
         Entity *entity = entitylist[i];
         if (entity == player)
@@ -94,34 +80,13 @@ void CleanEntityList(Player *player) {
     }
 }
 
-
-void EmptyList() {
+void EmptyList(std::vector<Entity*>& entitylist) {
     for (int i = 0; i < entitylist.size(); i++) {
         Entity *entity = entitylist.at(i);
         if (!entity)
             continue;
-        delete &entity;
+        delete entity;
     }
 
     entitylist.clear();
-}
-
-void DrawEntities() {
-    for (int i = 0; i < entitylist.size(); i++) {
-        Entity *base = entitylist.at(i);
-        if (!base)
-            continue;
-
-        base->Draw();
-    }
-}
-
-void UpdateEntities(float deltaTime) {
-    for (int i = 0; i < entitylist.size(); i++) {
-        Entity *entity = entitylist.at(i);
-        if (!entity)
-            continue;
-
-        entity->Update(deltaTime);
-    }
 }

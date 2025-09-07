@@ -27,15 +27,14 @@ void Player::Update(float deltaTime) {
 }
 
 void Player::Draw() {
-    DrawCircle(x, y, size, color);
+    DrawCircle(x, y, size, colliding ? RED : color);
 }
 
-Player::Player(std::vector<Entity*> *entityList) {
+Player::Player() {
     x = 0;
     y = 0;
     size = 2;
     health = 100;
     type = ENTITY_PLAYER;
     color = GREEN;
-    entityList->push_back(this);
 }

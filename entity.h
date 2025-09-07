@@ -22,17 +22,17 @@ public:
     void SetColor(Color color);
     void SetType(EntityType type);
     void SetSize(int size);
+    void SetColliding(int collision);
 
     Vector2 GetPosition();
     int GetSize();
     int GetType();
     Color GetColor();
-    bool IsColliding(std::vector<Entity*> *entitylist);
+    bool IsColliding();
 
-    virtual void Draw() = 0;
+    virtual void Draw();
     virtual void Update(float dt) = 0;
 
-    Entity(std::vector<Entity*> *entitylist);
     Entity();
 
     virtual ~Entity() {};

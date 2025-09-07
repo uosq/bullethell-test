@@ -17,7 +17,7 @@ public:
     void Draw() override;
     void Update(float dt) override;
 
-    Player(std::vector<Entity*> *entityList);
+    Player();
 };
 
 #endif

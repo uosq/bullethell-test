@@ -16,7 +16,7 @@ public:
     void Update(float dt) override;
     void Draw() override;
 
-    Projectile(std::vector<Entity*> *entityList);
+    Projectile();
 };
 
 #endif

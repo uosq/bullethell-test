@@ -1,6 +1,5 @@
 #include "projectile.h"
 #include "entity.h"
-#include <vector>
 
 void Projectile::Draw() {
     if (x > 800 || x < 0 || y < 0 || y > 800)
@@ -14,7 +13,6 @@ void Projectile::Update(float deltaTime) {
     y += speed.y * deltaTime;
 }
 
-Projectile::Projectile(std::vector<Entity*> *entitylist) {
-    entitylist->push_back(this);
+Projectile::Projectile() {
     this->type = ENTITY_PROJECTILE;
 }

@@ -1,15 +1,5 @@
 #include "entity.h"
 #include <raylib.h>
-#include <vector>
-
-Entity::Entity(std::vector<Entity*> *entitylist) {
-    x = 0;
-    y = 0;
-    color = WHITE;
-    type = ENTITY_PLAYER;
-    size = 10;
-    entitylist->push_back(this);
-}
 
 Entity::Entity() {
     x = 0;
@@ -48,15 +38,10 @@ int Entity::GetType() {
     return type;
 }
 
-bool Entity::IsColliding(std::vector<Entity*> *entitylist) {
-    for (int i = 0; i < entitylist->size(); i++) {
-        Entity *entity = entitylist->at(i);
-        if (!entity || entity == this)
-            continue;
+void Entity::SetColliding(int collision) {
+    colliding = collision;
+}
 
-        if (CheckCollisionCircles((Vector2){x, y}, size, (Vector2){entity->x, entity->y}, entity->size))
-            return true;
-    }
-
-    return false;
+void Entity::Draw() {
+    DrawCircle(x, y, size, color);
 }
